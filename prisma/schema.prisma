@@ -1,0 +1,318 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// User Management
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          String    @default("CUSTOMER")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  bookings      Booking[]
+  reviews       Review[]
+  savedItems    SavedItem[]
+  vendor        Vendor?
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Vendor Management
+model Vendor {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  businessName      String
+  businessType      String
+  category          String
+  gstNumber         String?
+  panNumber         String?
+  bankAccount       String?
+  ifscCode          String?
+  status            String    @default("PENDING")
+  subscriptionPlan  String    @default("FREE")
+  subscriptionEnds  DateTime?
+  verified          Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hotels            Hotel[]
+  bookings          Booking[]
+  payouts           Payout[]
+  subscriptionHistory SubscriptionHistory[]
+}
+
+// Hotels
+model Hotel {
+  id              String    @id @default(cuid())
+  vendorId        String
+  name            String
+  description     String
+  address         String
+  city            String
+  state           String
+  country         String    @default("India")
+  zipCode         String?
+  latitude        Float?
+  longitude       Float?
+  phone           String?
+  email           String?
+  website         String?
+  starRating      Int?
+  checkInTime     String    @default("14:00")
+  checkOutTime    String    @default("11:00")
+  googlePlaceId   String?
+  status          String    @default("DRAFT")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  vendor          Vendor    @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  rooms           Room[]
+  amenities       HotelAmenity[]
+  images          HotelImage[]
+  reviews         Review[]
+  bookings        Booking[]
+  savedBy         SavedItem[]
+}
+
+model Room {
+  id              String    @id @default(cuid())
+  hotelId         String
+  name            String
+  description     String?
+  roomType        String
+  maxOccupancy    Int
+  bedType         String?
+  size            Float?
+  basePrice       Float
+  quantity        Int       @default(1)
+  status          String    @default("ACTIVE")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  hotel           Hotel     @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  amenities       RoomAmenity[]
+  images          RoomImage[]
+  bookings        Booking[]
+  availability    RoomAvailability[]
+}
+
+model HotelAmenity {
+  id        String   @id @default(cuid())
+  hotelId   String
+  name      String
+  icon      String?
+  category  String?
+  
+  hotel     Hotel    @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+}
+
+model RoomAmenity {
+  id        String   @id @default(cuid())
+  roomId    String
+  name      String
+  icon      String?
+  
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}
+
+model HotelImage {
+  id        String   @id @default(cuid())
+  hotelId   String
+  url       String
+  caption   String?
+  order     Int      @default(0)
+  isCover   Boolean  @default(false)
+  
+  hotel     Hotel    @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+}
+
+model RoomImage {
+  id        String   @id @default(cuid())
+  roomId    String
+  url       String
+  caption   String?
+  order     Int      @default(0)
+  
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}
+
+model RoomAvailability {
+  id        String   @id @default(cuid())
+  roomId    String
+  date      DateTime
+  available Int
+  price     Float?
+  
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  
+  @@unique([roomId, date])
+}
+
+// Bookings
+model Booking {
+  id              String    @id @default(cuid())
+  userId          String
+  vendorId        String
+  hotelId         String?
+  roomId          String?
+  bookingType     String
+  checkIn         DateTime
+  checkOut        DateTime
+  guests          Int
+  rooms           Int       @default(1)
+  baseAmount      Float
+  taxAmount       Float
+  serviceCharge   Float
+  convenienceFee  Float
+  totalAmount     Float
+  commission      Float
+  commissionRate  Float
+  status          String    @default("PENDING")
+  paymentStatus   String    @default("PENDING")
+  cancellationPolicy String?
+  specialRequests String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user            User      @relation(fields: [userId], references: [id])
+  vendor          Vendor    @relation(fields: [vendorId], references: [id])
+  hotel           Hotel?    @relation(fields: [hotelId], references: [id])
+  room            Room?     @relation(fields: [roomId], references: [id])
+  payment         Payment?
+  review          Review?
+}
+
+// Payments
+model Payment {
+  id              String    @id @default(cuid())
+  bookingId       String    @unique
+  amount          Float
+  currency        String    @default("INR")
+  gateway         String
+  gatewayOrderId  String?
+  gatewayPaymentId String?
+  method          String?
+  status          String    @default("PENDING")
+  refundAmount    Float?
+  refundStatus    String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  booking         Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+// Payouts
+model Payout {
+  id              String    @id @default(cuid())
+  vendorId        String
+  amount          Float
+  commission      Float
+  netAmount       Float
+  tdsAmount       Float?
+  status          String    @default("PENDING")
+  processedAt     DateTime?
+  createdAt       DateTime  @default(now())
+
+  vendor          Vendor    @relation(fields: [vendorId], references: [id])
+}
+
+// Reviews
+model Review {
+  id              String    @id @default(cuid())
+  userId          String
+  hotelId         String?
+  bookingId       String?   @unique
+  rating          Int
+  cleanliness     Int?
+  service         Int?
+  location        Int?
+  value           Int?
+  comment         String?
+  pros            String?
+  cons            String?
+  verified        Boolean   @default(false)
+  vendorResponse  String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user            User      @relation(fields: [userId], references: [id])
+  hotel           Hotel?    @relation(fields: [hotelId], references: [id])
+  booking         Booking?  @relation(fields: [bookingId], references: [id])
+  images          ReviewImage[]
+}
+
+model ReviewImage {
+  id        String   @id @default(cuid())
+  reviewId  String
+  url       String
+  
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+}
+
+// Saved Items
+model SavedItem {
+  id        String   @id @default(cuid())
+  userId    String
+  hotelId   String?
+  type      String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hotel     Hotel?   @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, hotelId, type])
+}
+
+// Subscription History
+model SubscriptionHistory {
+  id        String    @id @default(cuid())
+  vendorId  String
+  plan      String
+  amount    Float
+  startDate DateTime
+  endDate   DateTime
+  status    String
+  createdAt DateTime  @default(now())
+
+  vendor    Vendor    @relation(fields: [vendorId], references: [id])
+}
