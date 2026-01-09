@@ -6,7 +6,7 @@ import { isValidEmail, isValidPhone } from '@/lib/utils';
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { name, email, phone, password, role = 'CUSTOMER' } = body;
+        const { name, email, password, role = 'CUSTOMER' } = body;
 
         // Validation
         if (!name || !email || !password) {
@@ -23,12 +23,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        if (phone && !isValidPhone(phone)) {
-            return NextResponse.json(
-                { success: false, error: 'Invalid phone number' },
-                { status: 400 }
-            );
-        }
+
 
         if (password.length < 8) {
             return NextResponse.json(
@@ -57,8 +52,7 @@ export async function POST(request: NextRequest) {
             data: {
                 name,
                 email,
-                phone,
-                hashedPassword,
+                password: hashedPassword,
                 role,
                 emailVerified: null, // Will be set after email verification
             },
@@ -66,7 +60,7 @@ export async function POST(request: NextRequest) {
                 id: true,
                 name: true,
                 email: true,
-                phone: true,
+
                 role: true,
                 createdAt: true,
             },

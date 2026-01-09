@@ -2,8 +2,8 @@ import Razorpay from 'razorpay';
 
 // Initialize Razorpay instance
 export const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID || '',
-    key_secret: process.env.RAZORPAY_KEY_SECRET || '',
+    key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_123',
+    key_secret: process.env.RAZORPAY_KEY_SECRET || 'secret',
 });
 
 // Create order
@@ -13,12 +13,12 @@ export async function createRazorpayOrder(amount: number, currency: string = 'IN
             amount: amount * 100, // Amount in paise
             currency,
             receipt,
-            payment_capture: 1,
+            payment_capture: true,
         });
-        return { success: true, order };
+        return { success: true as const, order };
     } catch (error) {
         console.error('Razorpay order creation error:', error);
-        return { success: false, error };
+        return { success: false as const, error };
     }
 }
 
@@ -42,10 +42,10 @@ export function verifyRazorpaySignature(
 export async function fetchPaymentDetails(paymentId: string) {
     try {
         const payment = await razorpay.payments.fetch(paymentId);
-        return { success: true, payment };
+        return { success: true as const, payment };
     } catch (error) {
         console.error('Razorpay payment fetch error:', error);
-        return { success: false, error };
+        return { success: false as const, error };
     }
 }
 
@@ -55,10 +55,10 @@ export async function initiateRefund(paymentId: string, amount?: number) {
         const refund = await razorpay.payments.refund(paymentId, {
             amount: amount ? amount * 100 : undefined, // Amount in paise
         });
-        return { success: true, refund };
+        return { success: true as const, refund };
     } catch (error) {
         console.error('Razorpay refund error:', error);
-        return { success: false, error };
+        return { success: false as const, error };
     }
 }
 
@@ -66,9 +66,9 @@ export async function initiateRefund(paymentId: string, amount?: number) {
 export async function fetchRefundStatus(refundId: string) {
     try {
         const refund = await razorpay.refunds.fetch(refundId);
-        return { success: true, refund };
+        return { success: true as const, refund };
     } catch (error) {
         console.error('Razorpay refund fetch error:', error);
-        return { success: false, error };
+        return { success: false as const, error };
     }
 }

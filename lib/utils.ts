@@ -18,9 +18,9 @@ export function formatDate(date: Date | string, format: "short" | "long" | "full
     const d = typeof date === "string" ? new Date(date) : date
 
     const options: Intl.DateTimeFormatOptions = {
-        short: { month: "short", day: "numeric", year: "numeric" },
-        long: { month: "long", day: "numeric", year: "numeric" },
-        full: { weekday: "long", month: "long", day: "numeric", year: "numeric" },
+        short: { month: "short", day: "numeric", year: "numeric" } as Intl.DateTimeFormatOptions,
+        long: { month: "long", day: "numeric", year: "numeric" } as Intl.DateTimeFormatOptions,
+        full: { weekday: "long", month: "long", day: "numeric", year: "numeric" } as Intl.DateTimeFormatOptions,
     }[format]
 
     return new Intl.DateTimeFormat("en-IN", options).format(d)

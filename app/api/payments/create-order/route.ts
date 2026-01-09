@@ -25,6 +25,13 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        if (!result.order) {
+            return NextResponse.json(
+                { success: false, error: 'Failed to create payment order' },
+                { status: 500 }
+            );
+        }
+
         return NextResponse.json({
             success: true,
             orderId: result.order.id,

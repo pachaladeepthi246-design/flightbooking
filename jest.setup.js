@@ -1,9 +1,9 @@
-import '@testing-library/jest-dom';
-import { TextEncoder, TextDecoder } from 'util';
+require('@testing-library/jest-dom');
+const { TextEncoder, TextDecoder } = require('util');
 
 // Polyfill for TextEncoder/TextDecoder
 global.TextEncoder = TextEncoder;
-global.TextDecoder = TextDecoder as any;
+global.TextDecoder = TextDecoder;
 
 // Mock environment variables
 process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3002';

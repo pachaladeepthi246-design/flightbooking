@@ -10,7 +10,6 @@ export async function POST(request: NextRequest) {
             // Personal Info
             name,
             email,
-            phone,
             password,
 
             // Business Info
@@ -42,12 +41,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        if (phone && !isValidPhone(phone)) {
-            return NextResponse.json(
-                { success: false, error: 'Invalid phone number' },
-                { status: 400 }
-            );
-        }
+
 
         if (gstNumber && !isValidGST(gstNumber)) {
             return NextResponse.json(
@@ -85,8 +79,7 @@ export async function POST(request: NextRequest) {
                 data: {
                     name,
                     email,
-                    phone,
-                    hashedPassword,
+                    password: hashedPassword,
                     role: 'VENDOR',
                 },
             });
@@ -105,7 +98,6 @@ export async function POST(request: NextRequest) {
                     subscriptionPlan: 'FREE',
                     status: 'PENDING',
                     verified: false,
-                    trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days trial
                 },
             });
 
