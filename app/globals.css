@@ -57,7 +57,11 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: Inter, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1,
@@ -66,7 +70,8 @@
   h4,
   h5,
   h6 {
-    @apply font-display font-bold;
+    font-family: Outfit, Inter, sans-serif;
+    font-weight: 700;
   }
 }
 
