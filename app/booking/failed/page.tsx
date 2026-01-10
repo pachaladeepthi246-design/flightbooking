@@ -1,9 +1,10 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { XCircle, RefreshCw, Home, HelpCircle } from 'lucide-react';
 
-export default function BookingFailedPage() {
+function FailedContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const error = searchParams.get('error') || 'Payment processing failed';
@@ -91,5 +92,17 @@ export default function BookingFailedPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function BookingFailedPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+            </div>
+        }>
+            <FailedContent />
+        </Suspense>
     );
 }

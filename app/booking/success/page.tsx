@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle, Download, Home, Calendar } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-export default function BookingSuccessPage() {
+function SuccessContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [bookingId, setBookingId] = useState('');
@@ -103,5 +103,17 @@ export default function BookingSuccessPage() {
                 </p>
             </div>
         </div>
+    );
+}
+
+export default function BookingSuccessPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+            </div>
+        }>
+            <SuccessContent />
+        </Suspense>
     );
 }

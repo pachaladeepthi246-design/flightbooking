@@ -39,20 +39,19 @@ export async function POST(
             );
         }
 
-        // Calculate refund amount based on cancellation policy
-        const refundAmount = booking.hotel ? calculateRefundAmount(
+        // Calculate refund amount based on cancellation policy (default: MODERATE)
+        const refundAmount = calculateRefundAmount(
             booking.totalAmount,
             new Date(booking.checkIn),
             new Date(),
-            booking.hotel.cancellationPolicy as 'FLEXIBLE' | 'MODERATE' | 'STRICT'
-        ) : 0;
+            'MODERATE' // Default policy since field doesn't exist in schema
+        );
 
         // Update booking status
         const updatedBooking = await prisma.booking.update({
             where: { id },
             data: {
                 status: 'CANCELLED',
-                cancelledAt: new Date(),
             },
         });
 
